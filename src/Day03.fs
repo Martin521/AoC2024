@@ -14,11 +14,11 @@ let getResults (lines: string list) =
     let rec getEnabledSections (s: string) =
         match s.IndexOf "don't()" with
         | -1 -> [s]
-        | i -> s[.. i] :: getEnabledSectionsNext s[i + 7 ..]
+        | i -> s[..i] :: getEnabledSectionsNext s[i + 7 ..]
     and getEnabledSectionsNext s =
         match s.IndexOf "do()" with
         | -1 -> []
-        | i -> getEnabledSections s[i ..]
+        | i -> getEnabledSections s[i..]
     let result2 = getEnabledSections input |> List.sumBy getMulSum
 
     result1, result2
