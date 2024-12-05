@@ -46,27 +46,10 @@ let getResults (lines: string list) =
         |> List.tail
         |> List.map (fun l -> l.Split(",") |> Array.map int)
 
-    // First sorter I found that I could make take a comparer
-    // https://github.com/TheAlgorithms/F-Sharp/blob/main/Algorithms/Sort/Bubble_Sort.fs
-    let rec Sort isSmaller list : 'T[] =
-        let mutable updated = false
-        let mutable list = list |> Array.copy
-        for index in 0 .. list.Length - 1 do
-            if index < list.Length - 1 then
-                let current = list.[index]
-                let next = list.[index + 1]
-                if isSmaller (next, current) then
-                    list.[index] <- next
-                    list.[index + 1] <- current
-                    updated <- true
-        if updated then
-            list <- Sort isSmaller list
-        list
-
     let isOrdered print = print |> Array.pairwise |> Array.forall orders.Contains
     let result1 = prints |> List.sumBy (fun p -> if isOrdered p then p[p.Length / 2] else 0)
 
-    let ordered print = print |> Sort orders.Contains
+    let ordered print = print |> Array.sortWith (fun p1 p2 -> if orders.Contains(p1, p2) then -1 else 1)
     let result2 = prints |> List.sumBy (fun p -> if isOrdered p then 0 else (ordered p)[p.Length / 2])
 
     result1, result2
