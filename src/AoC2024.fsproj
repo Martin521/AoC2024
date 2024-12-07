@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="lib.fs" />
+    <COmpile Include="Combinations.fs" />
     <Compile Include="Day*.fs" />
     <Compile Include="main.fs" />
   </ItemGroup>

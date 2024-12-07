@@ -4,9 +4,9 @@ open System
 open System.IO
 open System.Reflection
 
-let expectedResultsFileName = "results.txt"
-let inputFileName day = $"input/%s{day}.txt"
-let resultFuncName = "getResults"
+let private expectedResultsFileName = "results.txt"
+let private inputFileName day = $"input/%s{day}.txt"
+let private resultFuncName = "getResults"
 
 let private computeResults lines day =
     match Assembly.GetExecutingAssembly().ExportedTypes |> Seq.tryFind (fun ty -> ty.Name = day) with
@@ -50,9 +50,11 @@ if not <| File.Exists expectedResultsFileName then
 else
     let results = readExpectedResults expectedResultsFileName
     if args.Length > 2 then
-        printfn $"Call this program with just the day number as argument (or without arg)"
+        printfn """Call this program with the day as argument (like "Day01", or "xDay01" to use the example data). Or without arg for all tests"""
     elif args.Length = 2 then
         let day = args[1]
+        let day, useEx = if day.StartsWith "x" then day[1..], true else day, false
+        AoClib.useExample <- useEx
         match results.TryFind day with
         | None -> printfn $"'{day}' is not a valid day"
         | Some result -> test day result
