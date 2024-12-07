@@ -14,24 +14,23 @@ let testInput =
 292: 11 6 16 20"""
 
 let getResults lines =
-    let lines = if AoClib.useExample then splitLines testInput else lines
+    let lines = if useExample then splitLines testInput else lines
     let getEquation (line: string) =
         let split1 = line.Split(":")
         let split2 = split1[1].Trim().Split(" ") |> Array.map int64
         int64 split1[0], Array.toList split2
     let equations = lines |> List.map getEquation
     let ops1 = [(+); (*)]
-    let rec check ops expected res nums =
-        match nums with
-        | [] -> res = expected
-        | h::t -> ops |> List.exists (fun op -> check ops expected (op res h) t)
-    let isCorrect ops (expected, (nums: _ list)) = check ops expected nums.Head nums.Tail
+    let isCorrect ops (expected, (nums: _ list)) =
+        let rec check res nums =
+            match nums with
+            | [] -> res = expected
+            | h::t -> ops |> List.exists (fun op -> check (op res h) t)
+        check nums.Head nums.Tail
     let result ops = equations |> List.filter (isCorrect ops) |> List.sumBy fst
 
-    let rec digitNum x = if x = 0L then 0 else digitNum (x / 10L) + 1
-    let rec e10 = function 0 -> 1L | n -> 10L * e10 (n - 1)
-    let concat a b = e10 (digitNum b) * a + b
+    let rec shift a = function 0L -> a | b -> shift (a * 10L) (b / 10L)
+    let concat a b = shift a b + b
     let ops2 = concat :: ops1
-
 
     result ops1, result ops2
