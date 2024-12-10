@@ -10,17 +10,17 @@ let private resultFuncName = "getResults"
 
 let private computeResults lines day =
     match Assembly.GetExecutingAssembly().ExportedTypes |> Seq.tryFind (fun ty -> ty.Name = day) with
-    | None -> "ERROR", $"no module {day}"
+    | None -> Error $"no module {day}"
     | Some dayType ->
         match dayType.GetMethod(resultFuncName) with
-        | null -> $"missing function '{resultFuncName}' in module '{day}'", ""
+        | null -> Error $"missing function '{resultFuncName}' in module '{day}'"
         | method ->
             match method.Invoke(null, [|lines|]) |> nonNull with
-            | :? (string * string) as (r1, r2) -> r1, r2
-            | :? (int * int) as (r1, r2) -> string r1, string r2
-            | :? (int64 * int64) as (r1, r2) -> string r1, string r2
-            | :? (bigint * bigint) as (r1, r2) -> string r1, string r2
-            | r -> $"not a valid '{resultFuncName}' output type: {r.GetType()}", ""
+            | :? (string * string) as (r1, r2) -> Ok (r1, r2)
+            | :? (int * int) as (r1, r2) -> Ok (string r1, string r2)
+            | :? (int64 * int64) as (r1, r2) -> Ok (string r1, string r2)
+            | :? (bigint * bigint) as (r1, r2) -> Ok (string r1, string r2)
+            | r -> Error $"not a valid '{resultFuncName}' output type: {r.GetType()}"
 
 let private readExpectedResults fileName =
     File.ReadAllLines(fileName)
@@ -30,19 +30,27 @@ let private readExpectedResults fileName =
     |> List.map (fun words -> words[0], (words[1], words[2]))
     |> Map
 
-let private test day (e1, e2) =
+let private test (day, (e1, e2)) =
     let inputFile = $"input/%s{day}.txt"
     if not <| File.Exists inputFile then
-        printfn $"no input file {inputFile}"
+        Error $"no input file {inputFile}"
     else
         let lines = File.ReadAllLines inputFile |> Array.toList
         let start = DateTime.Now
-        let r1, r2 = computeResults lines day
-        let duration = (DateTime.Now - start).TotalMilliseconds
-        if e1 = r1 && e2 = r2 then
-            printfn $"{day} ok ({duration} ms)"
-        else
-            printfn $"{day}: expected {e1}; {e2}, got {r1}, {r2} ({duration} ms)"
+        match computeResults lines day with
+        | Ok (r1, r2) ->
+            let duration = (DateTime.Now - start).TotalMilliseconds
+            if e1 = r1 && e2 = r2 then
+                Ok $"{day} ok ({duration} ms)"
+            else
+                Ok $"{day}: expected {e1}; {e2}, got {r1}, {r2} ({duration} ms)"
+        | Error e -> Error e
+    
+let showResult verbose result =
+    match result with
+    | Error e -> if verbose then printfn $"%s{e}"
+    | Ok m -> printfn $"%s{m}"
+
 
 let args = Environment.GetCommandLineArgs()
 if not <| File.Exists expectedResultsFileName then
@@ -57,6 +65,6 @@ else
         AoClib.useExample <- useEx
         match results.TryFind day with
         | None -> printfn $"'{day}' is not a valid day"
-        | Some result -> test day result
+        | Some result -> test (day, result) |> showResult true
     else
-        Map.iter test results
+        results |> Map.toList |> List.iter (test >> showResult false)
