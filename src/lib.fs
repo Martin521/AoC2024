@@ -10,3 +10,4 @@ let splitLines (testInput: string) =
 let splitLine (separator: string) (line: string) =
     line.Split separator |> Array.toList
 
+let (|Even|Odd|) input = if input % 2 = 0 then Even else Odd
