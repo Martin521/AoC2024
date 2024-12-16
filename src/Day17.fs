@@ -6,6 +6,6 @@ let testInput =
     """"""
 
 let getResults (lines: string list) =
-    // let lines = splitLines testInput
+    let lines = if useExample then splitLines testInput else lines
 
     0, 0
