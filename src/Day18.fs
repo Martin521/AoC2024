@@ -39,7 +39,6 @@ let getResults (lines: string list, example) =
 
     let getShortestPathScore numBytesFallen =
         let byteSet = Set (List.take numBytesFallen bytes)
-        // let freeSet = Set[for r in 0..nr-1 do for c in 0..nc-1 do if not <| byteSet.Contains(r,c) then yield r, c]
         let getNeighbors (r, c) =
             [
                 if r > 0 then r-1, c
@@ -49,9 +48,6 @@ let getResults (lines: string list, example) =
             ]
             |> List.filter (not << byteSet.Contains)
             |> Set
-        // let scores = Array2D.create nr nc largeInt
-        // let getScore (r, c) = scores[r, c]
-        // let setScore (r, c) s = scores[r, c] <- s
         let rec updateScores score (scores, queue) =
             let updateScoresForPos (scores, queue) pos =
                 match Map.tryFind pos scores with
@@ -77,4 +73,4 @@ let getResults (lines: string list, example) =
         $"{c},{r}"
     
     
-    string result1, "1"
+    string result1, result2
