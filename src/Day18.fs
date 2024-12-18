@@ -39,6 +39,7 @@ let getResults (lines: string list, example) =
 
     let getShortestPathScore numBytesFallen =
         let byteSet = Set (List.take numBytesFallen bytes)
+        // let freeSet = Set[for r in 0..nr-1 do for c in 0..nc-1 do if not <| byteSet.Contains(r,c) then yield r, c]
         let getNeighbors (r, c) =
             [
                 if r > 0 then r-1, c
@@ -48,21 +49,21 @@ let getResults (lines: string list, example) =
             ]
             |> List.filter (not << byteSet.Contains)
             |> Set
-        let scores = Array2D.create nr nc largeInt
-        let getScore (r, c) = scores[r, c]
-        let setScore (r, c) s = scores[r, c] <- s
-        let rec updateScores score queue =
-            let updateAndReturnNeighbors pos =
-                if score < getScore pos then
-                    setScore pos score
-                    getNeighbors pos
-                else
-                    Set.empty
-            if not <| Set.isEmpty queue then
-                updateScores (score + 1) (queue |> Set.map updateAndReturnNeighbors |> Set.unionMany)
-        updateScores 0 Set[startPos]
-        getScore endPos
-    let result1 = getShortestPathScore take
+        // let scores = Array2D.create nr nc largeInt
+        // let getScore (r, c) = scores[r, c]
+        // let setScore (r, c) s = scores[r, c] <- s
+        let rec updateScores score (scores, queue) =
+            let updateScoresForPos (scores, queue) pos =
+                match Map.tryFind pos scores with
+                | None -> Map.add pos score scores, queue + getNeighbors pos
+                | Some prevScore when score < prevScore -> Map.add pos score scores, queue + getNeighbors pos
+                | Some _ -> scores, queue
+            if Set.isEmpty queue then
+                Map.tryFind endPos scores
+            else
+                updateScores (score + 1) (((scores, Set.empty), queue) ||> Set.fold updateScoresForPos)
+        updateScores 0 (Map.empty, Set[startPos])
+    let result1 = getShortestPathScore take |> Option.get
 
     let result2 =
         let rec find f imin imax =
@@ -71,9 +72,9 @@ let getResults (lines: string list, example) =
             else
                 let imid = (imax + imin + 1) / 2
                 if f imid then find f imin (imid - 1) else find f imid imax
-        let i = find (fun nbf -> getShortestPathScore nbf = largeInt) take bytes.Length
+        let i = find (fun nbf -> (getShortestPathScore nbf).IsNone) take bytes.Length
         let r, c = bytes[i]
         $"{c},{r}"
     
     
-    string result1, result2
+    string result1, "1"
