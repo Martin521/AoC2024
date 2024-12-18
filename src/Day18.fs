@@ -38,18 +38,18 @@ let getResults (lines: string list, example) =
     let endPos = nr - 1, nc - 1
 
     let getShortestPathScore numBytesFallen =
-        let byteSet = Set (List.take numBytesFallen bytes)
+        let byteSet = Set(List.take numBytesFallen bytes)
         let getNeighbors (r, c) =
             [
-                if r > 0 then r-1, c
-                if r < nr - 1 then r+1, c
-                if c > 0 then r, c-1
-                if c < nc - 1 then r, c+1
+                if r > 0 then r - 1, c
+                if r < nr - 1 then r + 1, c
+                if c > 0 then r, c - 1
+                if c < nc - 1 then r, c + 1
             ]
             |> List.filter (not << byteSet.Contains)
             |> Set
-        let rec updateScores score (scores, queue) =
-            let updateScoresForPos (scores, queue) pos =
+        let rec update score (scores, queue) =
+            let update1 (scores, queue) pos =
                 match Map.tryFind pos scores with
                 | None -> Map.add pos score scores, queue + getNeighbors pos
                 | Some prevScore when score < prevScore -> Map.add pos score scores, queue + getNeighbors pos
@@ -57,8 +57,8 @@ let getResults (lines: string list, example) =
             if Set.isEmpty queue then
                 Map.tryFind endPos scores
             else
-                updateScores (score + 1) (((scores, Set.empty), queue) ||> Set.fold updateScoresForPos)
-        updateScores 0 (Map.empty, Set[startPos])
+                update (score + 1) (((scores, Set.empty), queue) ||> Set.fold update1)
+        update 0 (Map.empty, Set[startPos])
     let result1 = getShortestPathScore take |> Option.get
 
     let result2 =
@@ -68,9 +68,8 @@ let getResults (lines: string list, example) =
             else
                 let imid = (imax + imin + 1) / 2
                 if f imid then find f imin (imid - 1) else find f imid imax
-        let i = find (fun nbf -> (getShortestPathScore nbf).IsNone) take bytes.Length
+        let i = find (getShortestPathScore >> Option.isNone) take bytes.Length
         let r, c = bytes[i]
         $"{c},{r}"
-    
-    
+
     string result1, result2
