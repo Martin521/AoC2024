@@ -5,8 +5,8 @@ open AoClib
 let testInput =
     """125 17"""
 
-let getResults (lines: string list) =
-    let lines = if useExample then splitLines testInput else lines
+let getResults (lines: string list, example) =
+    let lines = if example = "1" then splitLines testInput else lines
     let numbers = lines.Head.Split(" ") |> Seq.map (fun s -> 1L, int64 s) |> Seq.toList
     let rec getDigitsR = function 0L -> [] | n -> n % 10L :: getDigitsR (n / 10L)
     let rec getNumberR = function [] -> 0L | h::t -> h + 10L * (getNumberR t)

@@ -10,8 +10,8 @@ let testInput =
 3   9
 3   3"""
 
-let getResults (lines: string list) =
-    // let lines = splitLines testInput
+let getResults (lines: string list, example) =
+    let lines = if example = "1" then splitLines testInput else lines
     let ids = lines |> List.map (splitLine "   " >> List.map int)
     let ids1 = ids |> List.map List.head |> List.sort
     let ids2 = ids |> List.map (List.tail >> List.head) |> List.sort

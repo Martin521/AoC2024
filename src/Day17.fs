@@ -4,7 +4,7 @@ open AoClib
 
 #nowarn 25
 
-let testInput =
+let testInput1 =
     """Register A: 729
 Register B: 0
 Register C: 0
@@ -18,8 +18,8 @@ Register C: 0
 Program: 0,3,5,4,3,0
 """
 
-let getResults (lines: string list) =
-    let lines = if useExample then splitLines testInput2 else lines
+let getResults (lines: string list, example) =
+    let lines = match example with "1" -> splitLines testInput1 | "2" -> splitLines testInput2 | _ -> lines
     let oRegs = lines |> List.take 3 |> List.map (fun line -> (line.Split(":")[1]).Trim() |> int64) |> List.toArray
     let prog = ((lines |> List.skip 4 |> List.head).Split(" ")[1]).Split(",") |> Seq.map int |> Seq.toArray
 

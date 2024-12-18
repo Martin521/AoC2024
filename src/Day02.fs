@@ -10,8 +10,8 @@ let testInput =
 8 6 4 4 1
 1 3 6 7 9"""
 
-let getResults (lines: string list) =
-    // let lines = splitLines testInput
+let getResults (lines: string list, example) =
+    let lines = if example = "1" then splitLines testInput else lines
     let reports = lines |> List.map (splitLine " " >> List.map int)
     let isSafe report =
         let diffs = report |> List.pairwise |> List.map (fun (a, b) -> b - a)

@@ -32,8 +32,8 @@ let testInput =
 61,13,29
 97,13,75,29,47"""
 
-let getResults (lines: string list) =
-    // let lines = splitLines testInput
+let getResults (lines: string list, example) =
+    let lines = if example = "1" then splitLines testInput else lines
     let orders =
         lines
         |> List.takeWhile (fun l -> l.Length > 0)

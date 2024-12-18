@@ -14,8 +14,8 @@ MIIIIIJJEE
 MIIISIJEEE
 MMMISSJEEE"""
 
-let getResults (lines: string list) =
-    let lines = if useExample then splitLines testInput else lines
+let getResults (lines: string list, example) =
+    let lines = if example = "1" then splitLines testInput else lines
     let nr = lines.Length
     let nc = lines.Head.Length
     let plots = lines |> array2D

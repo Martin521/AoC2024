@@ -13,8 +13,8 @@ let testInput =
 21037: 9 7 18 13
 292: 11 6 16 20"""
 
-let getResults lines =
-    let lines = if useExample then splitLines testInput else lines
+let getResults (lines: string list, example) =
+    let lines = if example = "1" then splitLines testInput else lines
     let getEquation (line: string) =
         let split1 = line.Split(":")
         let split2 = split1[1].Trim().Split(" ") |> Array.map int64

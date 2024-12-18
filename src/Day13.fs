@@ -22,8 +22,8 @@ Button A: X+69, Y+23
 Button B: X+27, Y+71
 Prize: X=18641, Y=10279"""
 
-let getResults (lines: string list) =
-    let lines = if useExample then splitLines testInput else lines
+let getResults (lines: string list, example) =
+    let lines = if example = "1" then splitLines testInput else lines
     let regex = Regex(""".+: X[+=](\d+), Y[+=](\d+)""")
     let getEquation line = regex.Match(line).Groups |> Seq.tail |> Seq.map (_.Value >> int >> bigint) |> Seq.toList
     let machines = lines |> List.chunkBySize 4 |> List.map (List.take 3 >> List.map getEquation >> List.transpose)

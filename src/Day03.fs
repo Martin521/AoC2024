@@ -2,7 +2,7 @@ module Day03
 
 open System.Text.RegularExpressions
 
-let getResults (lines: string list) =
+let getResults (lines: string list, example: string) =
 
     let input = String.concat "" lines
 

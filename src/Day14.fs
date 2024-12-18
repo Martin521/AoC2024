@@ -18,8 +18,8 @@ p=7,3 v=-1,2
 p=2,4 v=2,-3
 p=9,5 v=-3,-3"""
 
-let getResults (lines: string list) =
-    let lines, nr, nc = if useExample then splitLines testInput, 7, 11 else lines, 103, 101
+let getResults (lines: string list, example: string) =
+    let lines, nr, nc = if example = "1" then splitLines testInput, 7, 11 else lines, 103, 101
     let getPV (line: string) =
         line.Split(" ")
         |> Array.toList

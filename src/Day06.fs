@@ -22,8 +22,8 @@ type Direction =
 
 let directionCount = 4
 
-let getResults (lines: string list) =
-    // let lines = splitLines testInput
+let getResults (lines: string list, example) =
+    let lines = if example = "1" then splitLines testInput else lines
     let nr = lines.Length
     let nc = lines.Head.Length
     let obstacles = lines |> List.map (Seq.map (fun c -> c = '#') >> Seq.toArray) |> List.toArray

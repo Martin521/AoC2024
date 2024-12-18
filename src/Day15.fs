@@ -49,8 +49,8 @@ let smallTestInput2 = """#######
 type Dir = Up | Down | Right | Left with
     static member fromChar = function '^' -> Up | 'v' -> Down | '<' -> Left | '>' -> Right | _ -> failwith "invalid d"
 
-let getResults (lines: string list) =
-    let lines = if useExample then splitLines testInput else lines
+let getResults (lines: string list, example) =
+    let lines = if example = "1" then splitLines testInput else lines
     let tilesList = lines |> List.takeWhile (not << System.String.IsNullOrEmpty) |> List.map Seq.toList
 
     let tiles = tilesList |> List.map List.toArray |> List.toArray

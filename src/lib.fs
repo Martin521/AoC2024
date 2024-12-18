@@ -2,8 +2,6 @@ module AoClib
 
 open System
 
-let mutable useExample = false
-
 let splitLines (testInput: string) =
     testInput.ReplaceLineEndings(Environment.NewLine).Split(Environment.NewLine) |> Array.toList
 

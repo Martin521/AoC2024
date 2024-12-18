@@ -108,7 +108,7 @@ let getResult2 blockCountList =
     let state = (initialState, Array.rev initialState.files) ||> Array.fold tryMoveFile
     check state 0I
 
-let getResults (lines: string list) =
-    let lines = if useExample then splitLines testInput else lines
+let getResults (lines: string list, example) =
+    let lines = if example = "1" then splitLines testInput else lines
     let blockCountList = List.exactlyOne lines |> Seq.map (fun c -> int (c - '0')) |> Seq.toList
     getResult1 blockCountList, getResult2 blockCountList

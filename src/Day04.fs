@@ -14,8 +14,8 @@ SAXAMASAAA
 MAMMMXMMMM
 MXMXAXMASX"""
 
-let getResults (lines: string list) =
-    // let lines = splitLines testInput
+let getResults (lines: string list, example) =
+    let lines = if example = "1" then splitLines testInput else lines
     let nr = lines.Length
     let nc = lines.Head.Length
     let chars = lines |> List.map Seq.toList |> array2D

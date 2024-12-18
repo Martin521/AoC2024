@@ -48,8 +48,8 @@ let rec mergeBy f xs ys =
     | _, [] -> xs
     | x::xt, y::yt -> if f x < f y then x :: mergeBy f xt ys else y :: mergeBy f xs yt
 
-let getResults (lines: string list) =
-    let lines = if useExample then splitLines testInput2 else lines
+let getResults (lines: string list, example) =
+    let lines = if example = "1" then splitLines testInput1 elif example = "2" then splitLines testInput2 else lines
     let bigScore = System.Int32.MaxValue / 2
     let createDirArray score = Array.create allDirections.Length (score, Set.empty)
     let perDir c = match c with '#' -> createDirArray -1 | _ -> createDirArray bigScore
