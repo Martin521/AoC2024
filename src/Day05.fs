@@ -37,19 +37,18 @@ let getResults (lines: string list, example) =
     let orders =
         lines
         |> List.takeWhile (fun l -> l.Length > 0)
-        |> List.map (fun l -> l.Split("|"))
-        |> List.map (fun p -> int p[0], int p[1])
+        |> List.map (splitString ("|") >> List.map int >> list2pair)
         |> Set
     let prints =
         lines
         |> List.skipWhile (fun l -> l.Length > 0)
         |> List.tail
-        |> List.map (fun l -> l.Split(",") |> Array.map int)
+        |> List.map (splitString (",") >> List.map int)
 
-    let isOrdered print = print |> Array.pairwise |> Array.forall orders.Contains
+    let isOrdered print = print |> List.pairwise |> List.forall orders.Contains
     let result1 = prints |> List.sumBy (fun p -> if isOrdered p then p[p.Length / 2] else 0)
 
-    let ordered print = print |> Array.sortWith (fun p1 p2 -> if orders.Contains(p1, p2) then -1 else 1)
+    let ordered print = print |> List.sortWith (fun p1 p2 -> if orders.Contains(p1, p2) then -1 else 1)
     let result2 = prints |> List.sumBy (fun p -> if isOrdered p then 0 else (ordered p)[p.Length / 2])
 
     result1, result2

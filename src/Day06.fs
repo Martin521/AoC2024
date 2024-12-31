@@ -14,58 +14,97 @@ let testInput =
 #.........
 ......#..."""
 
-type Direction =
-    | N
-    | S
-    | E
-    | W
-
-let directionCount = 4
-
 let getResults (lines: string list, example) =
     let lines = if example = "1" then splitLines testInput else lines
     let nr = lines.Length
     let nc = lines.Head.Length
-    let obstacles = lines |> List.map (Seq.map (fun c -> c = '#') >> Seq.toArray) |> List.toArray
-    let visited = obstacles |> Array.map (Array.map (fun _ -> false))
+    let obstacles = lines |> mkCharPosSet '#'
     let startRow = lines |> List.findIndex (Seq.exists (fun c -> c = '^'))
     let startCol = lines[startRow] |> Seq.findIndex (fun c -> c = '^')
-    let index = function N -> 0 | S -> 1 | E -> 2 | W -> 3
-    let turn = function N -> E | E -> S | S -> W | W -> N
-    let rec next (r, c, d) =
+    let startPos = ((startRow, startCol), 0)
+    // N=0 E=1 S=2 W=3
+    let turn d = (d + 1) % 4
+    let reverse d = (d + 2) % 4
+    let rec next obstacles ((r, c), d) =
         let r', c' =
             match d with
-            | W -> r, c - 1
-            | E -> r, c + 1
-            | S -> r + 1, c
-            | N -> r - 1, c
+            | 0 -> r - 1, c
+            | 1 -> r, c + 1
+            | 2 -> r + 1, c
+            | 3 -> r, c - 1
+            | _ -> failwith "unexpected direction"
         if r' < 0 || r' >= nr || c' < 0 || c' >= nc then None
-        elif obstacles[r'][c'] then next (r, c, turn d) else Some(r', c', d)
-    let rec patrol (r, c, d) =
-        visited[r].[c] <- true
-        match next (r, c, d) with
-        | None -> ()
-        | Some(r, c, d) -> patrol (r, c, d)
-    patrol (startRow, startCol, N)
-    let result1 = visited |> Array.sumBy (Array.sumBy (fun v -> if v then 1 else 0))
+        elif Set.contains (r', c') obstacles then next obstacles ((r, c), turn d)
+        else Some((r', c'), d)
 
-    let visited2 = Array3D.create nr nc directionCount false
-    let rec guardIsCircling (r, c, (d: Direction)) =
-        if visited2[r, c, index d] then
+    let rec patrol visited pos =
+        match next obstacles pos with
+        | None -> pos :: visited
+        | Some p -> patrol (pos :: visited) p
+    let visited = patrol [] startPos |> List.rev
+    let result1 = visited |> List.map fst |> Set |> Set.count
+
+    let obsList = obstacles |> Set.toList
+    let getMaps ((r, c) as p) =
+        let rec getMaps n0 t0 n1 t1 n2 t2 n3 t3 obsList =
+            match obsList with
+            | [] ->
+                let forwardMaps =
+                    [List.tryLast t0; List.tryLast t1; List.tryHead t2; List.tryHead t3]
+                    |> List.mapi (fun d t -> (p, d), Option.map (fun tt -> tt, turn d) t)
+                let backwardMaps =
+                    [
+                    List.filter (fun (_, c) -> c < n0) t0
+                    List.filter (fun (r, _) -> r < n1) t1
+                    List.filter (fun (_, c) -> c > n2) t2
+                    List.filter (fun (r, _) -> r > n3) t3
+                    ]
+                    |> List.mapi (fun d -> List.map (fun t -> (t, reverse d), Some (p, turn (reverse d))))
+                    |> List.concat
+                forwardMaps, backwardMaps
+            | (ro, co) as po :: t ->
+                match ro - r, co - c with
+                | -1, dc when dc < 0 ->                     // coming in southbound (2), turning west
+                    getMaps n0 t0 n1 t1 n2 (po::t2) n3 t3 t
+                | 0, dc when dc < 0 ->                      // western neighbor
+                    getMaps n0 t0 n1 t1 co t2 n3 t3 t
+                | 0, dc when dc > 0 && co < n0 ->           // eastern neighbor
+                    getMaps co t0 n1 t1 n2 t2 n3 t3 t
+                | 1, dc when dc > 0 ->                      // coming in northbound (0), turning east
+                    getMaps n0 (po::t0) n1 t1 n2 t2 n3 t3 t
+                | dr, -1 when dr > 0 ->                     // coming in eastbound (1), turning south
+                    getMaps n0 t0 n1 (po::t1) n2 t2 n3 t3 t
+                | dr, 0 when dr > 0 && ro < n1 ->           // southern neighbor
+                    getMaps n0 t0 ro t1 n2 t2 n3 t3 t
+                | dr, 0 when dr < 0 ->                      // northern neighbor
+                    getMaps n0 t0 n1 t1 n2 t2 ro t3 t
+                | dr, 1 when dr < 0 ->                      // coming in westbound (3), turning north
+                    getMaps n0 t0 n1 t1 n2 t2 n3 (po::t3) t
+                | _  -> getMaps n0 t0 n1 t1 n2 t2 n3 t3 t
+        getMaps nc [] nr [] 0 [] 0 [] obsList
+    let nextMaps = obsList|> List.collect (getMaps >> fst) |> Map
+    let nextMapsWith newObsPos =
+        let forwardMaps, backwardMaps = getMaps newObsPos
+        (nextMaps, forwardMaps @ backwardMaps) ||> List.fold (fun ms (p, tp) -> Map.add p tp ms)
+
+    let rec isLoop nextMaps visited pos =
+        if Set.contains pos visited then
             true
         else
-            visited2[r, c, index d] <- true
-            match next (r, c, d) with
+            match Map.find pos nextMaps with
             | None -> false
-            | Some(r, c, d) -> guardIsCircling (r, c, d)
-    let mutable count = 0
-    for obsr in 0 .. nr - 1 do
-        for obsc in 0 .. nc - 1 do
-            if visited[obsr][obsc] && not (obstacles[obsr][obsc]) then
-                obstacles[obsr][obsc] <- true
-                System.Array.Clear visited2
-                if guardIsCircling (startRow, startCol, N) then count <- count + 1
-                obstacles[obsr][obsc] <- false
-    let result2 = count
+            | Some p -> isLoop nextMaps (visited.Add pos) p
+    let rec countLoops createsLoop remaining =
+        match remaining with
+        | [] -> failwith "unexpected: empty in countLoops"
+        | [_] -> createsLoop |> Map.values |> Seq.filter id |> Seq.length
+        | _ :: (((obsPos, d) :: _) as t) ->
+            let createsLoop =
+                if createsLoop.ContainsKey obsPos then
+                    createsLoop
+                else
+                    createsLoop.Add(obsPos, isLoop (nextMapsWith obsPos) Set.empty (obsPos, d))
+            countLoops createsLoop t
+    let result2 = countLoops Map.empty visited
 
     result1, result2

@@ -21,30 +21,23 @@ let getResults (lines: string list, example) =
     let chars = lines |> List.map Seq.toList |> array2D
 
     let dirs = [1, 0; -1, 0; 0, 1; 0, -1; 1, 1; 1, -1; -1, 1; -1, -1]
-    let rec hasWord (word: string) (dr, dc) (r, c) =
+    let rec hasWord (word: string) (r, c) (dr, dc) =
         if word.Length = 0 then true
         elif r < 0 || r >= nr || c < 0 || c >= nr then false
         elif word[0] <> chars[r, c] then false
-        else hasWord word[1..] (dr, dc) (r + dr, c + dc)
-    let mutable result1 = 0
-    for r in 0 .. nr - 1 do
-        for c in 0 .. nc - 1 do
-            for d in dirs do
-                if hasWord "XMAS" d (r, c) then
-                    result1 <- result1 + 1
+        else hasWord word[1..] (r + dr, c + dc) (dr, dc)
+    let countWordStartingAt word pos = dirs |> List.sumBy (fun d -> if hasWord word pos d then 1 else 0)
+    let result1 = allPositions nr nc |> List.sumBy (countWordStartingAt "XMAS")
 
-    let dirs = [1, 1; 1, -1; -1, 1; -1, -1]
-    let hasMAS (d1, d2) (r, c) =
-        chars[r, c] = 'A'
-        && chars[r + d1, c + d1] = 'M'
-        && chars[r - d1, c - d1] = 'S'
-        && chars[r + d2, c - d2] = 'M'
-        && chars[r - d2, c + d2] = 'S'
-    let mutable result2 = 0
-    for r in 1 .. nr - 2 do
-        for c in 1 .. nc - 2 do
-            for d in dirs do
-                if hasMAS d (r, c) then
-                    result2 <- result2 + 1
+    let MasCount (r, c) =
+        if chars[r, c] <> 'A' then 0
+        else
+            let se = chars[r + 1, c + 1]
+            let nw = chars[r - 1, c - 1]
+            let sw = chars[r + 1, c - 1]
+            let ne = chars[r - 1, c + 1]
+            if (se = 'M' && nw = 'S' || se = 'S' && nw = 'M')
+                && (ne = 'M' && sw = 'S' || ne = 'S' && sw = 'M') then 1 else 0
+    let result2 = allInnerPositions nr nc |> List.sumBy MasCount
 
     result1, result2

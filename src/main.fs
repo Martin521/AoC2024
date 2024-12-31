@@ -39,7 +39,7 @@ let private test additionalArg (day, (e1, e2)) =
         let start = DateTime.Now
         match computeResults lines day additionalArg with
         | Ok (r1, r2) ->
-            let duration = (DateTime.Now - start).TotalMilliseconds
+            let duration = int (DateTime.Now - start).TotalMilliseconds
             if e1 = r1 && e2 = r2 then
                 Ok $"{day} ok ({duration} ms)"
             else
