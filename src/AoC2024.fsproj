@@ -5,7 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="lib.fs" />
-    <Compile Include="Day20.fs" />
+    <Compile Include="Day21.fs" />
     <Compile Include="main.fs" />
   </ItemGroup>
   <ItemGroup>

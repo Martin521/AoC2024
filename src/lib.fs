@@ -9,6 +9,8 @@ let splitLine (separator: string) (line: string) = line.Split separator |> Array
 
 let splitString (splitter: string) (s: string) = s.Split splitter |> Array.toList
 
+let char2int (c: char) = int c - int '0'
+
 let startsWith (s: string) (x: string) = x.StartsWith s
 
 let list2pair xs = List.head xs, xs.Tail.Head
@@ -43,9 +45,7 @@ let (|Even|Odd|) input = if input % 2 = 0 then Even else Odd
 let rec gcd x y = if y = 0L then x else gcd y (x % y)
 let lcm x y = x * y / gcd x y
 
-let memoize fn =
-    let cache =
-        new Collections.Generic.Dictionary<_, _>(StringComparer.Ordinal)
+let memoizeWith (cache: System.Collections.Generic.Dictionary<_, _>) fn =
     fun x ->
         match cache.TryGetValue x with
         | true, v ->
@@ -54,3 +54,5 @@ let memoize fn =
             let v = fn (x)
             cache.Add(x, v)
             v
+let memoizationCache() = new System.Collections.Generic.Dictionary<_,_>()
+let memoize fn = memoizeWith (memoizationCache()) fn
