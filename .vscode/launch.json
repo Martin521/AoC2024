@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/artifacts/bin/AoC2024/debug/AoC2024.dll",
-            "args": ["Day21", "1"],
+            "args": ["Day22", "1"],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "console": "internalConsole"
