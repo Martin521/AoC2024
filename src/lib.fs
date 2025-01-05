@@ -9,6 +9,8 @@ let splitLine (separator: string) (line: string) = line.Split separator |> Array
 
 let splitString (splitter: string) (s: string) = s.Split splitter |> Array.toList
 
+let strLen (s: string) = s.Length
+
 let char2int (c: char) = int c - int '0'
 
 let startsWith (s: string) (x: string) = x.StartsWith s
