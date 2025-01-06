@@ -125,9 +125,9 @@ let getResults (lines: string list, example) =
         | None, Some gs2 -> gs2, Some input1
         | _ -> failwith $"unexpeced halfadder config in {i}"
 
-    let checkOutput i n =
-        let errCond = n <> $"z%02d{i}" || List.exists (fun (_, (_, (in1, in2))) -> in1 = n || in2 = n) gatesList
-        if errCond then Some n else None
+    let checkOutput i wire =
+        let errCond = wire <> $"z%02d{i}" || List.exists (fun (_, (_, (in1, in2))) -> in1 = wire || in2 = wire) gatesList
+        if errCond then Some wire else None
 
     let ccGate wire =
         let xList, aList, oList = getAllTargets wire

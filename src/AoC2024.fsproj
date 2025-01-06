@@ -6,7 +6,7 @@
   <ItemGroup>
     <Compile Include="lib.fs" />
     <Compile Include="Combinations.fs" />
-    <Compile Include="Day24.fs" />
+    <Compile Include="Day*.fs" />
     <Compile Include="main.fs" />
   </ItemGroup>
   <ItemGroup>
