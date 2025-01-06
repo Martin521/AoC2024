@@ -41,6 +41,7 @@ let getResults (lines: string list, example) =
             getTrace (pos :: trace) pos nextPos
     let trace = getTrace [] startPos startPos
     let iTrace = trace |> List.mapi (fun i (r, c) -> i, r, c)
+    let rec skip n = function h::t when n > 0 -> skip (n - 1) t | xs-> xs
     let getCheatCount maxCheatLength =
         let rec getCount trace1 trace2 count =
             match trace1, trace2 with
@@ -48,8 +49,10 @@ let getResults (lines: string list, example) =
             | h::t, [] -> getCount t t count
             | (i1, r1, c1)::t1, (i2, r2, c2)::t2 ->
                 let cheatLen = abs (r1 - r2) + abs (c1 - c2)
-                let ct = if cheatLen <= maxCheatLength && abs (i1 - i2) - cheatLen >= minGain then count + 1 else count
-                getCount trace1 t2 ct
+                let gain = abs (i1 - i2) - cheatLen
+                let margin = (max (cheatLen - maxCheatLength) (minGain - gain))
+                let ct = if margin <= 0 then count + 1 else count
+                getCount trace1 (skip (margin / 2 - 1) t2) ct
         getCount iTrace iTrace 0
 
     getCheatCount 2, getCheatCount 20
